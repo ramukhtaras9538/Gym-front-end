@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #090505;
+  --color-surface: #111111;
+  --color-surface-2: #181414;
+  --color-line: rgba(255, 255, 255, 0.12);
+  --color-accent: #FF1E1E;
+  --color-accent-deep: #B20F0F;
+  --color-accent-2: #FF6363;
+  --color-ink: #F9F7F5;
+  --color-muted: #A4A0A0;
+  --color-glow: rgba(255, 30, 30, 0.18);
+
+  --font-display: "Anton", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: radial-gradient(circle at top left, rgba(255, 30, 30, 0.09), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(255, 30, 30, 0.06), transparent 28%),
+    var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+* {
+  transition: background-color 0.24s ease, border-color 0.24s ease, color 0.24s ease, transform 0.24s ease;
+}
+
+button,
+input,
+textarea,
+a {
+  transition: color 0.24s ease, background-color 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+}
+
+/* ----------------------------------------------------------------
+   MARQUEE / HAZARD BAND
+---------------------------------------------------------------- */
+.hazard-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 26s linear infinite;
+}
+.hazard-track--reverse {
+  animation-direction: reverse;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.hazard-band {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(245, 183, 58, 0.9),
+    rgba(245, 183, 58, 0.9) 16px,
+    rgba(17, 26, 34, 0.98) 16px,
+    rgba(17, 26, 34, 0.98) 32px
+  );
+  background-size: 220% 220%;
+  animation: hazard-shift 14s linear infinite;
+}
+@keyframes hazard-shift {
+  from { background-position: 0 0; }
+  to { background-position: 92px 0; }
+}
+
+/* diagonal grain texture for hero / fallback panels */
+.grain-grid {
+  background-image:
+    linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.text-outline {
+  -webkit-text-stroke: 1.5px var(--color-ink);
+  color: transparent;
+}
+
+/* ----------------------------------------------------------------
+   PHOTO TREATMENT — red/black duotone, the site's signature look
+---------------------------------------------------------------- */
+.img-duotone {
+  filter: grayscale(0.48) contrast(1.12) brightness(1.04);
+  transition: filter 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s ease;
+  will-change: filter, transform;
+}
+.group:hover .img-duotone {
+  filter: grayscale(0) contrast(1.05) brightness(1.1);
+  transform: scale(1.02);
+}
+
+.duotone-overlay {
+  background: linear-gradient(155deg, rgba(0, 0, 0, 0.24) 6%, rgba(178, 15, 15, 0.45) 65%, rgba(255, 30, 30, 0.3) 130%);
+  mix-blend-mode: color;
+  opacity: 0.62;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.group:hover .duotone-overlay {
+  opacity: 0.28;
+}
+
+/* toned-down vignette so type stays legible without feeling heavy */
+.photo-vignette {
+  background: linear-gradient(180deg, rgba(9, 5, 5, 0.08) 0%, rgba(9, 5, 5, 0.42) 45%, rgba(9, 5, 5, 0.78) 100%);
+}
+.photo-vignette-top {
+  background: linear-gradient(0deg, rgba(9, 5, 5, 0.08) 0%, rgba(9, 5, 5, 0.55) 100%);
+}
+
+/* thin film-grain noise laid over photography for texture, not decoration */
+.grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.4;
+}
+
+.corner-tag {
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.soft-glow {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 183, 58, 0.2); }
+  50% { box-shadow: 0 0 30px 8px rgba(245, 183, 58, 0.12); }
+}
+
+.animate-floating {
+  animation: float 5.5s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-glow 4.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hazard-track { animation: none; }
+  .hazard-band { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* focus visibility */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* number readout underline */
+.stat-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: slashed-zero;
+}
+
+/* cursor-reactive glow used behind featured photo blocks */
+.glow-accent {
+  background: radial-gradient(circle at 50% 30%, rgba(255,30,30,0.35), transparent 5  0%);
+  filter: blur(60px);
+}
