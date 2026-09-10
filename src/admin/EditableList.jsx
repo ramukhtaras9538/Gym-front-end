@@ -27,7 +27,7 @@ export default function EditableList({ page, section, title, items = [], fields,
     const f = {};
     fields.forEach((field) => {
       if (field.array) {
-        f[field.name] = "";
+        f[field.name] = field.type === "file" ? [] : "";
       } else {
         f[field.name] = field.type === "number" ? 0 : "";
       }
@@ -47,7 +47,11 @@ export default function EditableList({ page, section, title, items = [], fields,
     fields.forEach((field) => {
       const rawValue = item[field.name];
       if (field.array) {
-        f[field.name] = Array.isArray(rawValue) ? rawValue.join(", ") : rawValue ?? "";
+        if (field.type === "file") {
+          f[field.name] = Array.isArray(rawValue) ? rawValue : (rawValue ? String(rawValue).split(",").map((part) => part.trim()).filter(Boolean) : []);
+        } else {
+          f[field.name] = Array.isArray(rawValue) ? rawValue.join(", ") : rawValue ?? "";
+        }
       } else {
         f[field.name] = rawValue ?? (field.type === "number" ? 0 : "");
       }
@@ -64,10 +68,40 @@ export default function EditableList({ page, section, title, items = [], fields,
     setError("");
   }
 
+  function normalizeFileInput(value) {
+    if (value instanceof File) return value;
+    if (value && typeof value === "object" && value !== null) {
+      if (Array.isArray(value)) return value.filter((item) => item instanceof File);
+      if (typeof value[0] !== "undefined" && value[0] instanceof File) {
+        return value[0];
+      }
+      if (typeof value.length === "number" && value.length > 0 && value[0] instanceof File) {
+        return value[0];
+      }
+    }
+    return value;
+  }
+
   function handleFieldChange(name, type, value, isArray = false) {
+    let nextValue = value;
+
+    if (type === "file" && !isArray && value && typeof value === "object" && !(value instanceof File)) {
+      nextValue = normalizeFileInput(value);
+    }
+
+    if (type === "file" && isArray && value && typeof value === "object" && !(value instanceof File)) {
+      nextValue = Array.from(value || []).filter((item) => item instanceof File);
+    }
+
     setForm((f) => ({
       ...f,
-      [name]: isArray ? value : type === "number" ? Number(value) : value,
+      [name]: isArray && type === "file"
+        ? nextValue
+        : isArray
+          ? value
+          : type === "number"
+            ? Number(value)
+            : nextValue,
     }));
   }
 
@@ -78,13 +112,39 @@ export default function EditableList({ page, section, title, items = [], fields,
     try {
       const payload = { ...form };
       for (const field of fields) {
-        if (field.type === "file" && payload[field.name] instanceof File) {
-          const resp = await (await import("../lib/api")).uploadFile(payload[field.name]);
+        const fieldValue = payload[field.name];
+
+        if (field.type === "file" && fieldValue instanceof File) {
+          const resp = await (await import("../lib/api")).uploadFile(fieldValue);
           payload[field.name] = resp.url;
+        } else if (field.type === "file" && Array.isArray(fieldValue)) {
+          const uploaded = [];
+          for (const item of fieldValue) {
+            const normalized = normalizeFileInput(item);
+            if (normalized instanceof File) {
+              const resp = await (await import("../lib/api")).uploadFile(normalized);
+              uploaded.push(resp.url);
+            } else if (typeof item === "string" && item.trim()) {
+              uploaded.push(item.trim());
+            }
+          }
+          payload[field.name] = uploaded;
+        } else if (field.type === "file" && fieldValue && typeof fieldValue === "object" && !(fieldValue instanceof File)) {
+          const normalized = normalizeFileInput(fieldValue);
+          if (normalized instanceof File) {
+            const resp = await (await import("../lib/api")).uploadFile(normalized);
+            payload[field.name] = resp.url;
+          }
         }
 
         if (field.array && typeof payload[field.name] === "string") {
           payload[field.name] = normalizeArrayValue(payload[field.name]);
+        }
+
+        if (field.array && Array.isArray(payload[field.name])) {
+          payload[field.name] = payload[field.name]
+            .map((item) => String(item).trim())
+            .filter(Boolean);
         }
       }
 
@@ -149,11 +209,36 @@ export default function EditableList({ page, section, title, items = [], fields,
                   className="mt-1 w-full bg-transparent border-b border-line focus:border-accent py-2 outline-none resize-none text-sm"
                 />
                 ) : field.type === "file" ? (
-                  <input
-                    type="file"
-                    onChange={(e) => handleFieldChange(field.name, field.type, e.target.files[0])}
-                    className="mt-1"
-                  />
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple={!!field.array}
+                      onChange={(e) => handleFieldChange(field.name, field.type, e.target.files, !!field.array)}
+                      className="mt-1"
+                    />
+
+                    {field.array && Array.isArray(form[field.name]) && form[field.name].length > 0 && (
+                      <div className="mt-4 grid grid-cols-3 gap-2">
+                        {form[field.name].map((url, index) => (
+                          <img
+                            key={`${field.name}-${index}`}
+                            src={url}
+                            alt={`${field.label} ${index + 1}`}
+                            className="h-24 w-full object-cover rounded-md border border-line"
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {!field.array && typeof form[field.name] === "string" && form[field.name] && (
+                      <img
+                        src={form[field.name]}
+                        alt="Current file"
+                        className="mt-4 h-36 w-full object-cover rounded-md border border-line"
+                      />
+                    )}
+                  </>
                 ) : (
                   <input
                     type={field.type === "number" ? "number" : "text"}

@@ -65,7 +65,7 @@ export default function AdminInfrastructure() {
         fields={[
           { name: "title", label: "Group title" },
           { name: "subtitle", label: "Subtitle" },
-          { name: "images", label: "Image URLs (comma separated)", type: "textarea", array: true },
+          { name: "images", label: "Images (max 5)", type: "file", array: true },
         ]}
       />
 

@@ -11,6 +11,7 @@ import PageLoader from "../components/PageLoader";
 
 export default function Infrastructure() {
   const [content, setContent] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     getPage("infrastructure").then(setContent);
@@ -76,28 +77,65 @@ export default function Infrastructure() {
         </Reveal>
 
         <div className="space-y-10">
-          {galleryGroups.map((group) => (
-            <div key={group._id || group.title} className="border border-line bg-surface p-5 md:p-7">
-              <div className="mb-6">
-                <h3 className="font-display text-2xl uppercase">{group.title}</h3>
-                {group.subtitle && <p className="text-muted mt-2 text-sm">{group.subtitle}</p>}
+          {galleryGroups.map((group) => {
+            const images = (group.images || []).filter(Boolean).slice(0, 5);
+
+            return (
+              <div key={group._id || group.title} className="border border-line bg-surface p-5 md:p-7">
+                <div className="mb-8">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-accent">Group</p>
+                  <h3 className="font-display text-3xl md:text-4xl uppercase mt-2">{group.title}</h3>
+                  {group.subtitle && <p className="text-muted mt-2 text-sm md:text-base">{group.subtitle}</p>}
+                </div>
+
+                <div className="gallery-animated-grid">
+                  {images.map((image, index) => (
+                    <button
+                      type="button"
+                      key={`${group.title}-${index}`}
+                      className={`gallery-animated-item gallery-animated-item--${index + 1}`}
+                      style={{ animationDelay: `${index * 0.12}s` }}
+                      onClick={() => setSelectedImage({ src: image, title: group.title, index: index + 1 })}
+                    >
+                      <div className="gallery-image-shell">
+                        <img
+                          src={image}
+                          alt={`${group.title} ${index + 1}`}
+                          className="gallery-image"
+                        />
+                        <div className="gallery-image-overlay" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(group.images || []).filter(Boolean).map((image, index) => (
-                  <ParallaxImage
-                    key={`${group.title}-${index}`}
-                    src={image}
-                    alt={`${group.title} ${index + 1}`}
-                    ratio="aspect-4/3"
-                    speed={20}
-                    className="overflow-hidden border border-line"
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
+
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="gallery-lightbox" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setSelectedImage(null)}
+              className="gallery-lightbox-close"
+              aria-label="Close image"
+            >
+              ×
+            </button>
+            <img src={selectedImage.src} alt={selectedImage.title} className="gallery-lightbox-image" />
+            <div className="gallery-lightbox-meta">
+              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">{selectedImage.title}</span>
+              <span className="font-display text-xl uppercase">Photo {selectedImage.index}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Marquee text="MEET THE COACHING STAFF \u2014 EYES ON EVERY REP" reverse />
 

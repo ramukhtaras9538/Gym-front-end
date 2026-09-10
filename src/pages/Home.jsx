@@ -131,31 +131,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section className="max-w-7xl mx-auto px-5 md:px-8 py-24">
-        <Reveal>
-          <h2 className="font-display text-4xl md:text-5xl uppercase max-w-2xl leading-tight">
-            <SplitText text="Built different from" />
-            <br />
-            <SplitText text="the franchise gym" delay={0.15} className="text-accent" />
-          </h2>
-        </Reveal>
-
-        <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-14">
-          {features.map((f, i) => (
-            <StaggerItem key={f._id}>
-              <TiltCard className="bg-surface border border-line h-full">
-                <ParallaxImage src={f.img} alt={f.title} ratio="aspect-4/5" speed={26} eyebrow={`0${i + 1}`} />
-                <div className="p-8">
-                  <h3 className="font-display text-xl uppercase mb-3">{f.title}</h3>
-                  <p className="text-muted text-sm leading-relaxed">{f.body}</p>
-                </div>
-              </TiltCard>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </section>
-
       <Marquee text={secondaryMarqueeText} reverse />
 
       {/* PROGRAMS */}
@@ -179,6 +154,31 @@ export default function Home() {
                   <span className="font-mono text-4xl text-accent">{p.code}</span>
                   <h3 className="font-display text-2xl uppercase mt-3 mb-2 text-ink">{p.name}</h3>
                   <p className="text-ink/75 text-sm leading-relaxed">{p.desc}</p>
+                </div>
+              </TiltCard>
+            </StaggerItem>
+          ))}
+        </Stagger>
+      </section>
+
+      {/* FEATURES */}
+      <section className="max-w-7xl mx-auto px-5 md:px-8 py-24">
+        <Reveal>
+          <h2 className="font-display text-4xl md:text-5xl uppercase max-w-2xl leading-tight">
+            <SplitText text="Built different from" />
+            <br />
+            <SplitText text="the franchise gym" delay={0.15} className="text-accent" />
+          </h2>
+        </Reveal>
+
+        <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-14">
+          {features.map((f, i) => (
+            <StaggerItem key={f._id}>
+              <TiltCard className="bg-surface border border-line h-full">
+                <ParallaxImage src={f.img} alt={f.title} ratio="aspect-4/5" speed={26} eyebrow={`0${i + 1}`} />
+                <div className="p-8">
+                  <h3 className="font-display text-xl uppercase mb-3">{f.title}</h3>
+                  <p className="text-muted text-sm leading-relaxed">{f.body}</p>
                 </div>
               </TiltCard>
             </StaggerItem>
