@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AdminAuthProvider } from "./context/AdminAuthContext";
+import { AdminAuthProvider } from "./context/AdminauthContext";
 import ScrollProgress from "./components/ScrollProgress";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
